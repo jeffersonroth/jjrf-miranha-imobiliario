@@ -2,12 +2,13 @@
 
 import json
 import logging
+import os
 from threading import Thread
 from time import sleep
 from markupsafe import Markup
 import traceback
 
-from flask import Flask, request, render_template, jsonify
+from flask import Flask, request, render_template, jsonify, send_from_directory
 from utils.mongo import get_client, setup_db
 from scraper import states_collection, cities_collection, houses_collection
 
@@ -17,6 +18,18 @@ logging.basicConfig(level=logging.DEBUG)
 
 sleep(15)
 setup_db()
+
+
+@app.route('/static/images/favicon.png')
+def static_favicon():
+    return send_from_directory(os.path.join(app.root_path, 'static/image'), 'favicon.png',
+                               mimetype='image/png')
+
+
+@app.route('/static/css/<file>')
+def static_css(file):
+    return send_from_directory(os.path.join(app.root_path, 'static/css'), file,
+                               mimetype='text/css')
 
 
 @app.route('/')
