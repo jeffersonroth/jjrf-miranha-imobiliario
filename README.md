@@ -1,7 +1,7 @@
 ### Description
 
 Python app that scrapes McMakler website, and offer an API endpoint to query the data.
-Miranha comes from the way brazilian refer to Spideman, so Miranha Imobiliario would almost translate to "Real-Estate-Broker-Spiderman".
+Miranha comes from the way brazilians refer to Spideman, so Miranha Imobiliario would almost translate to "Real-Estate-Broker-Spiderman".
 
 ### Objective
 
