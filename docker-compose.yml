@@ -1,0 +1,56 @@
+version: "3.8"
+
+networks:
+  default:
+    name: mcmakler_network
+
+services:
+  mongo:
+    image: mongo:5.0.6
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: password
+    volumes:
+      - ./mongo:/docker-entrypoint-initdb.d
+
+  chrome:
+    image: selenium/node-chrome:4.1.2-20220208
+    shm_size: 2gb
+    depends_on:
+      - selenium-hub
+    environment:
+      - SE_EVENT_BUS_HOST=selenium-hub
+      - SE_EVENT_BUS_PUBLISH_PORT=4442
+      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+    restart: always
+
+  firefox:
+    image: selenium/node-firefox:4.1.2-20220208
+    shm_size: 2gb
+    depends_on:
+      - selenium-hub
+    environment:
+      - SE_EVENT_BUS_HOST=selenium-hub
+      - SE_EVENT_BUS_PUBLISH_PORT=4442
+      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+    restart: always
+
+  selenium-hub:
+    image: selenium/hub:4.1.2-20220208
+    container_name: selenium-hub
+    ports:
+      - "4442:4442"
+      - "4443:4443"
+      - "4444:4444"
+    restart: always
+
+  app:
+    build:
+      context: .
+      dockerfile: Python.Dockerfile
+    ports:
+      - "5000:5000"
+    depends_on:
+      - selenium-hub
+      - mongo

@@ -1,0 +1,107 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>McMakler Web Scraper API</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="../images/favicon.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
+    <!-- Bulma Version 0.9.0-->
+    <link rel='stylesheet' href='https://unpkg.com/bulma@0.9.0/css/bulma.min.css'>
+    <link rel='stylesheet'
+          href='https://cdnjs.cloudflare.com/ajax/libs/overlayscrollbars/1.9.1/css/OverlayScrollbars.min.css'>
+    <link rel='stylesheet' href='https://kingsora.github.io/OverlayScrollbars/etc/os-theme-thin-dark.css'>
+    <link rel='stylesheet' href="../css/prism.css">
+    <link rel="stylesheet" href="../css/cheatsheet.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+          integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg=="
+          crossorigin="anonymous" referrerpolicy="no-referrer"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"
+            integrity="sha512-yFjZbTYRCJodnuyGlsKamNE/LlEaEAxSUDe5+u61mV8zzqJVFOH7TnULE2/PP/l5vKWpUNnF4VGVkXh3MjgLsg=="
+            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://kit.fontawesome.com/7dc3015a44.js" crossorigin="anonymous"></script>
+</head>
+
+<body>
+
+<script>
+    function scrapeHouses() {
+        var url = "/scrapeHouses";
+
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", url);
+
+        xhr.setRequestHeader("Accept", "application/json");
+        xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.onreadystatechange = function () {
+            if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
+                document.getElementById("scrape-button").value = "Scraping! (Running on background)";
+            } else {
+                document.getElementById("scrape-button").value = "Error!";
+            }
+        };
+        xhr.onloadstart = function () {
+            document.getElementById("scrape-button").value = "Starting scraping!";
+        }
+
+        xhr.send(JSON.stringify({}));
+    }
+</script>
+
+<section class="hero is-primary">
+    <div class="hero-body">
+        <div class="columns">
+            <div class="column is-12">
+                <div class="container content">
+                    <h1 class="title">McMakler Web Scraper</h1>
+                    <h3 class="subtitle">by Jeff Roth</h3>
+                    <a href="https://www.linkedin.com/in/jeffersonroth/" target="_blank"
+                       class="button is-primary is-large">
+                        <span class="icon"><i class="fab fa-linkedin"></i></span>
+                        <span>Linkedin</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<section class="section">
+    <div class="container">
+        <div class="columns">
+            <div class="column is-3">
+                <aside class="is-medium menu">
+                    <p class="menu-label">Endpoints</p>
+                    <ul class="menu-list">
+                        <li class="is-right">
+                            <a href="/endpoints/queryHouses" class="is-active"><i
+                                    class="fab fa-solid fa-magnifying-glass-location"></i> queryHouses</a>
+                        </li>
+                        <li class="is-right">
+                            <a href="#scrape" class="is-active"><i
+                                    class="fab fa-solid fa-spider-web"></i> scrapeHouses</a>
+                        </li>
+                </aside>
+            </div>
+            <div class="column is-9">
+                <div class="content is-medium">
+                    <div class="box">
+                        <h4 id="scrape" class="title is-3">Scrape Houses</h4>
+                        <article class="message is-primary">
+                            <span class="icon has-text-primary"><i class="fas fa-solid fa-play"></i></span>
+                            <div class="message-body">By clicking the button below, the web scraper will start to scrape
+                                all the houses. This action might take several hours to complete.
+                            </div>
+                        </article>
+                        <input id="scrape-button" class="button is-block is-primary is-fullwidth is-medium"
+                               type="submit"
+                               value="Start Scraping!" onclick="scrapeHouses()"><br>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+</body>
+
+</html>
