@@ -1,3 +1,8 @@
+### Description
+
+Python app that scrapes McMakler website, and offer an API endpoint to query the data.
+Miranha comes from the way brazilian refer to Spideman, so Miranha Imobiliario would almost translate to "Real-Estate-Broker-Spiderman".
+
 ### Objective
 
 Develop a solution that crawls a website, collects specific data from the response, stores it in a database and provides a REST API.
@@ -25,7 +30,7 @@ The solution consists of a Python Flask app, Selenium and MongoDB.
 
 ### Getting started
 
-- Create Docker network: $ docker-compose -f docker-compose.yml up --build
+- Docker-compose: $ docker-compose -f docker-compose.yml up --build
 
 - Navigate to [Scraper page](http://localhost:5000/start), and click the button "Start Scrapping!". The scrapper will run on background. The process might take several hours to complete.
 
