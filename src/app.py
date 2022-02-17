@@ -3,12 +3,16 @@
 import json
 import logging
 import os
+import sys
 from threading import Thread
 from time import sleep
 from markupsafe import Markup
 import traceback
 
-from flask import Flask, request, render_template, jsonify, send_from_directory
+from flask import Flask, request, render_template, jsonify, send_from_directory, Blueprint
+from pymongo.errors import PyMongoError
+from werkzeug.exceptions import HTTPException
+
 from utils.mongo import get_client, setup_db
 from scraper import states_collection, cities_collection, houses_collection
 
@@ -20,9 +24,15 @@ sleep(15)
 setup_db()
 
 
+@app.route('/static/images/favicon.ico')
+def static_favicon_ico():
+    return send_from_directory(os.path.join(app.root_path, 'static/images'), 'favicon.png',
+                               mimetype='image/x-icon')
+
+
 @app.route('/static/images/favicon.png')
-def static_favicon():
-    return send_from_directory(os.path.join(app.root_path, 'static/image'), 'favicon.png',
+def static_favicon_png():
+    return send_from_directory(os.path.join(app.root_path, 'static/images'), 'favicon.png',
                                mimetype='image/png')
 
 
@@ -36,34 +46,46 @@ def static_css(file):
 @app.route('/endpoints')
 @app.route('/endpoints/queryHouses')
 def app_index():
-    cities_count = get_client()["mcmakler"]["cities"].count_documents({})
-    app.logger.info(f"cities_count: {cities_count}")
-    if cities_count < 1:
-        states_collection()
-        cities_collection()
-    states = get_client()["mcmakler"]["cities"].distinct("state")
-    app.logger.info(f"states: {states}")
-    optgroups = ""
-    for state in states:
-        cities = get_client()["mcmakler"]["cities"].distinct("city", {"state": state})
-        if len(cities) < 1:
+    try:
+        cities_count = get_client()["mcmakler"]["cities"].count_documents({})
+        app.logger.info(f"cities_count: {cities_count}")
+        if cities_count < 1:
             states_collection()
             cities_collection()
+        states = get_client()["mcmakler"]["cities"].distinct("state")
+        app.logger.info(f"states: {states}")
+        optgroups = ""
+        for state in states:
             cities = get_client()["mcmakler"]["cities"].distinct("city", {"state": state})
-        app.logger.info(f"cities: {cities}")
-        cities_options = "".join([f'<option class="navbar-item">{city}</option>' for city in cities if len(cities) > 0])
-        optgroups += f'<optgroup class="navbar-item" label="{state}">{cities_options}</optgroup>' if len(
-            cities) > 0 else ""
+            if len(cities) < 1:
+                states_collection()
+                cities_collection()
+                cities = get_client()["mcmakler"]["cities"].distinct("city", {"state": state})
+            app.logger.info(f"cities: {cities}")
+            cities_options = "".join(
+                [f'<option class="navbar-item">{city}</option>' for city in cities if len(cities) > 0])
+            optgroups += f'<optgroup class="navbar-item" label="{state}">{cities_options}</optgroup>' if len(
+                cities) > 0 else ""
 
-    cities_markup = Markup(optgroups)
+        cities_markup = Markup(optgroups)
 
-    object_types = get_client()["mcmakler"]["houses"].distinct("object_type")
-    object_options = "".join(
-        [f'<option class="navbar-item">{obj}</option>' for obj in object_types if len(object_types) > 0])
-    object_markup = Markup(
-        f'<optgroup class="navbar-item" label="Objekttyp">{object_options}</optgroup>' if len(object_types) > 0 else "")
+        object_types = get_client()["mcmakler"]["houses"].distinct("object_type")
+        object_options = "".join(
+            [f'<option class="navbar-item">{obj}</option>' for obj in object_types if len(object_types) > 0])
+        object_markup = Markup(
+            f'<optgroup class="navbar-item" label="Objekttyp">{object_options}</optgroup>' if len(
+                object_types) > 0 else "")
 
-    return render_template("index.html", cities=cities_markup, object_types=object_markup)
+        return render_template("queryHouses.html", cities=cities_markup, object_types=object_markup)
+
+    except PyMongoError as error:
+        traceback.print_exc()
+        handle_exception(HTTPException(status_code=500, response=error))
+        return render_template("errors.html", giphy_query="my+bad", error_title="Error 500", error_message=error), 500
+
+    except Exception as error:
+        traceback.print_exc()
+        return render_template("errors.html", giphy_query="my+bad", error_title="Error 500", error_message=error), 500
 
 
 @app.route('/queryHouses', methods=['POST'])
@@ -114,8 +136,13 @@ def query_houses():
 
         return jsonify({"message": houses})
 
-    except Exception:
+    except PyMongoError as error:
         traceback.print_exc()
+        handle_exception(HTTPException(status_code=500, response=error))
+
+    except Exception as error:
+        traceback.print_exc()
+        return jsonify({"message": {"error": error}})
 
 
 @app.route('/scrapeHouses', methods=['POST'])
@@ -134,7 +161,48 @@ def scrape_houses():
 @app.route('/start')
 @app.route('/endpoints/scrapeHouses')
 def scrape_houses_endpoint():
-    return render_template("scrape_houses.html")
+    return render_template("scrapeHouses.html")
+
+
+@app.errorhandler(404)
+def page_not_found(error):
+    return render_template("errors.html", giphy_query="not+found", error_title="Error 404", error_message=error), 404
+
+
+@app.errorhandler(500)
+def internal_error(error):
+    return render_template("errors.html", giphy_query="my+bad", error_title="Error 500", error_message=error), 500
+
+
+@app.errorhandler(HTTPException)
+def handle_httpexception(error):
+    """Return JSON instead of HTML for HTTP errors."""
+    response = error.get_response()
+    response.data = json.dumps({
+        "code": error.code,
+        "name": error.name,
+        "description": error.description,
+    })
+    response.content_type = "application/json"
+    return response
+
+
+@app.errorhandler(Exception)
+def handle_exception(error):
+    # pass through HTTP errors
+    if isinstance(error, HTTPException):
+        response = error.get_response()
+        response.data = json.dumps({
+            "code": error.code,
+            "name": error.name,
+            "description": error.description,
+        })
+        response.content_type = "application/json"
+        return response
+
+    # now you're handling non-HTTP exceptions only
+    return render_template("errors.html", giphy_query="my+bad", error_title=f"Error {error.name} ({error.code})",
+                           error_message=error), 500
 
 
 if __name__ == "__main__":

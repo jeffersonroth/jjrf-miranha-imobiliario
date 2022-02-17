@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<script>
+    var giphy_images = [];
+    $(document).ready(function () {
+        var giphy_query = $("#giphy-query").text();
+        $.get({
+            url: "https://api.giphy.com/v1/gifs/search?q=" + giphy_query + "&limit=25&api_key=CPV7NfF2mDu2QELrmjcJB0zva34ruOVa&rating=pg",
+            success: function (result) {
+                var data = result.data;
+                for (var index in data) {
+                    var gifObject = data[index];
+                    var gifURL = gifObject.images.original.url;
+                    console.log(gifURL);
+                    giphy_images.push("<img width='200px' src='" + gifURL + "'/>");
+                }
+                $("#gif-wrap").html(giphy_images[0]);
+            },
+            error: function (error) {
+                console.log(error);
+            }
+        });
+    });
+
+    function newGIF() {
+        var gif = giphy_images[giphy_images.length * Math.random() | 0]
+        $("#gif-wrap").html(gif);
+    }
+</script>
+<section class="section">
+    <div class="container">
+        <div class="columns">
+            <div class="column is-3">
+                <aside class="is-medium menu">
+                    <p class="menu-label">Endpoints</p>
+                    <ul class="menu-list">
+                        <li class="is-right">
+                            <a href="/endpoints/queryHouses" class="is-active"><i
+                                    class="fab fa-solid fa-magnifying-glass-location"></i> queryHouses</a>
+                        </li>
+                        <li class="is-right">
+                            <a href="/endpoints/scrapeHouses" class="is-active"><i
+                                    class="fab fa-solid fa-spider-web"></i> scrapeHouses</a>
+                        </li>
+                    </ul>
+                </aside>
+            </div>
+            <div class="column is-9">
+                <div class="content is-medium">
+                    <div class="box">
+                        <h4 id="scrape" class="title is-3">{{error_title}}</h4>
+                        <article class="message is-primary">
+                            <span class="icon has-text-primary"><i class="fas fa-solid fa-play"></i></span>
+                            <div class="message-body">Fear not!
+                                Just click one of the listed pages, check the error details below, or generate a gif...
+                                I won't judge...
+                            </div>
+                        </article>
+                        <pre class="language-javascript"><code
+                                class="language-javascript">{{error_message}}</code></pre>
+                        <input id="new-gif" class="button is-block is-primary is-fullwidth is-medium"
+                               type="submit"
+                               value="New GIF" onclick="newGIF()"><br>
+                        <div id="gif-wrap" class="file is-centered"></div>
+                        <div id="gif-logo" class="file is-centered"><img
+                                src="https://storage.googleapis.com/chydlx/codepen/random-gif-generator/giphy-logo.gif"
+                                class="file is-centered"/>
+                        </div>
+                        <div id="giphy-query" hidden>{{giphy_query}}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

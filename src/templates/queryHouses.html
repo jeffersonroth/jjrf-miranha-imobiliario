@@ -1,29 +1,6 @@
-<!doctype html>
-<html>
+{% extends 'base.html' %}
 
-<head>
-    <meta charset="UTF-8">
-    <title>McMakler Web Scraper API</title>
-    <link rel="icon" type="image/png" sizes="32x32" href="/static/images/favicon.png">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
-    <!-- Bulma Version 0.9.0-->
-    <link rel='stylesheet' href='https://unpkg.com/bulma@0.9.0/css/bulma.min.css'>
-    <link rel='stylesheet'
-          href='https://cdnjs.cloudflare.com/ajax/libs/overlayscrollbars/1.9.1/css/OverlayScrollbars.min.css'>
-    <link rel='stylesheet' href='https://kingsora.github.io/OverlayScrollbars/etc/os-theme-thin-dark.css'>
-    <link rel='stylesheet' href="/static/css/prism.css">
-    <link rel="stylesheet" href="/static/css/cheatsheet.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
-          integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg=="
-          crossorigin="anonymous" referrerpolicy="no-referrer"/>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"
-            integrity="sha512-yFjZbTYRCJodnuyGlsKamNE/LlEaEAxSUDe5+u61mV8zzqJVFOH7TnULE2/PP/l5vKWpUNnF4VGVkXh3MjgLsg=="
-            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script src="https://kit.fontawesome.com/7dc3015a44.js" crossorigin="anonymous"></script>
-</head>
-
-<body>
-
+{% block content %}
 <script>
     function getSelectedOptgroupAndOption(name) {
         var selected = document.querySelector("select[name=" + name + "] option:checked")
@@ -101,30 +78,12 @@
         xhr.send(JSON.stringify(body));
     }
 </script>
-
-<section class="hero is-primary">
-    <div class="hero-body">
-        <div class="columns">
-            <div class="column is-12">
-                <div class="container content">
-                    <h1 class="title">McMakler Web Scraper</h1>
-                    <h3 class="subtitle">by Jeff Roth</h3>
-                    <a href="https://www.linkedin.com/in/jeffersonroth/" target="_blank"
-                       class="button is-primary is-large">
-                        <span class="icon"><i class="fab fa-linkedin"></i></span>
-                        <span>Linkedin</span>
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
 <section class="section">
     <div class="container">
         <div class="columns">
             <div class="column is-3">
                 <aside class="is-medium menu">
-                    <p class="menu-label">Enspoints</p>
+                    <p class="menu-label">Endpoints</p>
                     <ul class="menu-list">
                         <li class="is-right">
                             <a href="#method" class="is-active"><i
@@ -134,6 +93,7 @@
                             <a href="/endpoints/scrapeHouses" class="is-active"><i
                                     class="fab fa-solid fa-spider-web"></i> scrapeHouses</a>
                         </li>
+                    </ul>
                 </aside>
             </div>
             <div class="column is-9">
@@ -144,16 +104,14 @@
                             <span class="icon has-text-primary"><i class="fab fa-solid fa-code"></i></span>
                             <div class="message-body">Structure of request's body</div>
                         </article>
-                        <pre><code class="language-javascript">
-body = {
+                        <pre class="language-javascript"><code class="language-javascript">body = {
     "object_type": <var>object_type</var>,
     "purchase_price": <var>purchase_price</var>,
     "state": <var>state</var>,
     "city": <var>city</var>,
     "sort_by": <var>sort_by</var>,
     "sort_asc": <var>sort_asc</var>
-}
-                        </code></pre>
+}</code></pre>
                     </div>
                     <div class="box">
                         <h4 id="fields" class="title is-3">Fields</h4>
@@ -161,14 +119,12 @@ body = {
                             <span class="icon has-text-primary"><i class="fas fa-info-circle"></i></span>
                             <div class="message-body">List of fields.</div>
                         </article>
-                        <pre><code class="language-javascript">
-<var>object_type</var>: [str] Object type in uppercase.
+                        <pre class="language-javascript"><code class="language-javascript"><var>object_type</var>: [str] Object type in uppercase.
 <var>purchase_price</var>: [[float, float]] Purchase array with min and max values.
 <var>state</var>: Object type in uppercase.
 <var>city</var>: Object type in uppercase.
 <var>sort_by</var>: [str] Sort by field (object_type|purchase_price|house_id). {Default: house_id}
-<var>sort_asc</var>: [bool] Sort ASC (true/false). {Default: True}
-                        </code></pre>
+<var>sort_asc</var>: [bool] Sort ASC (true/false). {Default: True}</code></pre>
                     </div>
                     <div class="box">
                         <h4 id="try-it" class="title is-3">Sandbox</h4>
@@ -265,9 +221,11 @@ body = {
 
                         <div id="results">
                             <h4>Generated body given selected attributes:</h4>
-                            <kbd id="form-output" class="language-javascript">...</kbd><br><br>
+                            <pre class="language-javascript"><kbd id="form-output" class="language-javascript">...</kbd></pre>
+                            <br><br>
                             <h4>API POST response to request using generated body:</h4>
-                            <samp id="post-output" class="language-javascript">...</samp>
+                            <pre class="language-javascript"><samp id="post-output"
+                                                                   class="language-javascript">...</samp></pre>
                         </div>
                     </div>
                 </div>
@@ -275,7 +233,4 @@ body = {
         </div>
     </div>
 </section>
-
-</body>
-
-</html>
+{% endblock %}
